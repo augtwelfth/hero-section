@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hero Section</title>
+  <style>
+    /* =========================================================
+       1. VARIABEL (ubah di sini tanpa menyentuh animasi)
+       ========================================================= */
+    :root {
+      /* Warna gradasi. Jika hanya 2 atau 3 yang diisi, warna dibagi ulang otomatis */
+      --gradient-color-1: #7c3aed;
+      --gradient-color-2: #2563eb;
+      --gradient-color-3: #06b6d4;
+      --gradient-color-4: #db2777;
+      --gradient-bg-base: #0a0a0f;
+
+      /* Kecepatan & easing */
+      --gradient-cycle: 12s;   /* durasi satu siklus gradasi */
+      --glow-cycle: 6s;        /* durasi denyut glow */
+      --easing: ease-in-out;
+
+      /* Overlay gelap untuk kontras teks */
+      --overlay-color: rgba(10, 10, 15, 0.35);
+
+      /* Teks */
+      --text-color: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.88);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--gradient-bg-base);
+      color: var(--text-color);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* =========================================================
+       2. SECTION HERO
+       ========================================================= */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      min-height: 100dvh;           /* dvh menyesuaikan tinggi layar mobile; 100vh jadi fallback */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.25rem;
+      text-align: center;
+      overflow: hidden;
+      isolation: isolate;           /* membuat stacking context agar z-index lapisan terkendali */
+      background: var(--gradient-bg-base);
+    }
+
+    /* Overlay gelap tipis di atas gradasi untuk menjaga kontras teks */
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--overlay-color);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Wrapper blob. Dipakai JS untuk efek mouse follow (hanya transform) */
+    .blobs {
+      position: absolute;
+      inset: -20%;                  /* lebih besar dari layar agar tepi tidak terlihat saat bergerak */
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* Setiap blob = radial-gradient lembut yang bergerak lewat transform */
+    .blob {
+      position: absolute;
+      width: 60vmax;
+      height: 60vmax;
+      border-radius: 50%;
+      /* --blob-color diisi oleh JS dari palet warna di :root */
+      background: radial-gradient(circle, var(--blob-color, var(--gradient-color-1)) 0%, transparent 65%);
+      opacity: 0.9;
+      animation-duration: var(--gradient-cycle);
+      animation-timing-function: var(--easing);
+      animation-iteration-count: infinite;
+      will-change: transform;       /* hanya pada elemen yang benar-benar dianimasikan */
+    }
+
+    /* Posisi awal dan jalur gerak tiap blob (keyframe berakhir di posisi awal -> loop mulus) */
+    .blob-1 { top: -10%;   left: -10%;  animation-name: drift-1; }
+    .blob-2 { top: 20%;    right: -15%; animation-name: drift-2; }
+    .blob-3 { bottom: -20%; left: 10%;  animation-name: drift-3; }
+    .blob-4 { bottom: -10%; right: -5%; animation-name: drift-4; }
+
+    @keyframes drift-1 {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      50%      { transform: translate3d(14vw, 10vh, 0) scale(1.15); }
+    }
+    @keyframes drift-2 {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      50%      { transform: translate3d(-12vw, 12vh, 0) scale(1.1); }
+    }
+    @keyframes drift-3 {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1.05); }
+      50%      { transform: translate3d(10vw, -14vh, 0) scale(0.95); }
+    }
+    @keyframes drift-4 {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      50%      { transform: translate3d(-16vw, -8vh, 0) scale(1.2); }
+    }
+
+    /* Glow lembut di belakang judul */
+    .glow {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: min(90vw, 680px);
+      height: min(60vh, 440px);
+      transform: translate(-50%, -50%);
+      background: radial-gradient(closest-side, rgba(255, 255, 255, 0.35), transparent);
+      opacity: 0.4;
+      z-index: 0;
+      pointer-events: none;
+      animation: glow-pulse var(--glow-cycle) var(--easing) infinite;
+      will-change: opacity;
+    }
+    @keyframes glow-pulse {
+      0%, 100% { opacity: 0.4; }
+      50%      { opacity: 0.7; }
+    }
+
+    /* Konten di atas semua lapisan dekoratif */
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 48rem;
+    }
+
+    h1 {
+      font-size: clamp(2.25rem, 5vw + 1rem, 4.5rem);   /* mengecil otomatis di mobile */
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .subtitle {
+      margin-top: 1.25rem;
+      font-size: clamp(1rem, 1.5vw + 0.5rem, 1.25rem);
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .cta-wrap { margin-top: 2.25rem; }
+
+    /* Tombol CTA: semi-transparan dengan border tipis */
+    .cta {
+      display: inline-block;
+      padding: 0.9rem 2rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      font-weight: 600;
+      text-decoration: none;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: transform 0.3s var(--easing), background-color 0.3s var(--easing);
+    }
+    .cta:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .cta:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 4px;
+    }
+
+    /* Animasi masuk: fade-in + naik 20px ke 0.
+       Dibungkus di elemen terpisah agar tidak bentrok dengan transform hover tombol. */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fade-up 0.8s var(--easing) forwards;
+      animation-delay: var(--delay, 0ms);
+    }
+    @keyframes fade-up {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =========================================================
+       3. AKSESIBILITAS: hormati prefers-reduced-motion
+       ========================================================= */
+    @media (prefers-reduced-motion: reduce) {
+      .blob,
+      .glow,
+      .reveal {
+        animation: none;          /* gradasi & glow dibekukan */
+      }
+      .reveal {
+        opacity: 1;               /* teks langsung tampil tanpa animasi */
+        transform: none;
+      }
+      .glow { opacity: 0.55; }
+      .cta, .cta:hover { transition: none; }
+      .cta:hover { transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <section class="hero" id="hero">
+    <!-- Lapisan gradasi: 4 blob bergerak -->
+    <div class="blobs" id="blobs">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="blob blob-3"></div>
+      <div class="blob blob-4"></div>
+    </div>
+
+    <!-- Glow di belakang judul -->
+    <div class="glow" aria-hidden="true"></div>
+
+    <div class="hero-content">
+      <!-- Judul: muncul pertama (delay 0) -->
+      <h1 class="reveal" style="--delay: 0ms;">Judul Hero Anda</h1>
+
+      <!-- Subjudul: muncul 150ms setelah judul -->
+      <p class="subtitle reveal" style="--delay: 150ms;">
+        Subjudul yang menjelaskan nilai utama produk atau layanan Anda.
+      </p>
+
+      <!-- CTA: muncul 300ms -->
+      <div class="cta-wrap reveal" style="--delay: 300ms;">
+        <a href="#" class="cta">Mulai Sekarang</a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    /* =========================================================
+       4. KONFIGURASI JAVASCRIPT
+       ========================================================= */
+    const ENABLE_MOUSE_FOLLOW = true;   // ubah ke false untuk mematikan efek kursor
+    const LERP = 0.05;                  // kelembutan gerakan (makin kecil makin halus)
+    const MAX_SHIFT = 60;               // jarak geser maksimum dalam px
+
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isTouchDevice = matchMedia('(hover: none), (pointer: coarse)').matches;
+
+    /* ---- Pembagian warna ke blob ----
+       Membaca warna yang terdefinisi di :root. Warna kosong dilewati,
+       lalu blob dibagikan secara berurutan agar sistem tetap berjalan. */
+    (function assignBlobColors() {
+      const rootStyle = getComputedStyle(document.documentElement);
+      const palette = [
+        '--gradient-color-1',
+        '--gradient-color-2',
+        '--gradient-color-3',
+        '--gradient-color-4'
+      ]
+        .map(name => rootStyle.getPropertyValue(name).trim())
+        .filter(Boolean);
+
+      const colors = palette.length ? palette : ['#7c3aed'];
+      document.querySelectorAll('.blob').forEach((blob, i) => {
+        blob.style.setProperty('--blob-color', colors[i % colors.length]);
+      });
+    })();
+
+    /* ---- Efek mouse follow dengan lerp ----
+       Hanya aktif jika diizinkan, bukan perangkat sentuh, dan tidak reduced-motion. */
+    (function mouseFollow() {
+      if (!ENABLE_MOUSE_FOLLOW || isTouchDevice || reducedMotion) return;
+
+      const hero = document.getElementById('hero');
+      const blobsLayer = document.getElementById('blobs');
+      blobsLayer.style.willChange = 'transform';
+
+      let targetX = 0, targetY = 0;   // posisi tujuan (dari kursor)
+      let currentX = 0, currentY = 0; // posisi saat ini (hasil lerp)
+
+      hero.addEventListener('pointermove', (e) => {
+        const r = hero.getBoundingClientRect();
+        // Normalisasi posisi kursor ke rentang -1 s/d 1, lalu kalikan jarak maksimum
+        targetX = ((e.clientX - r.left) / r.width - 0.5) * 2 * MAX_SHIFT;
+        targetY = ((e.clientY - r.top) / r.height - 0.5) * 2 * MAX_SHIFT;
+      });
+
+      // Kembali ke tengah saat kursor keluar dari hero
+      hero.addEventListener('pointerleave', () => {
+        targetX = 0;
+        targetY = 0;
+      });
+
+      function animate() {
+        // Lerp: bergerak 5% dari jarak tersisa setiap frame
+        currentX += (targetX - currentX) * LERP;
+        currentY += (targetY - currentY) * LERP;
+        blobsLayer.style.transform = `translate3d(${currentX.toFixed(2)}px, ${currentY.toFixed(2)}px, 0)`;
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+  </script>
+
+</body>
+</html>
